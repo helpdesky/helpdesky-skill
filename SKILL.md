@@ -17,7 +17,7 @@ Ask the customer only for what the chosen surface needs, then store each value a
 
 | Surface | What to ask for | Where they find it in the Helpdesky dashboard |
 |---|---|---|
-| Widget | **Helpdesk ID** (a UUID) | **Embeds → Widget** (shown in the embed snippet) |
+| Widget | **Helpdesk ID** (a UUID) | The **Helpdesk ID** box on **Settings** or any **Embeds** page (Copy button) |
 | Contact form | **Helpdesk ID** | **Embeds → Contact Form** |
 | Ticket center | **Helpdesk ID** + **HMAC secret** | **Embeds → Ticket Center** (generate/copy the HMAC secret there) |
 | Writing/syncing articles | **API key** (starts with `hdh_`) | **Settings → API Integration** |
@@ -25,6 +25,8 @@ Ask the customer only for what the chosen surface needs, then store each value a
 | Inbound email | **slug** + **6-digit code** | **Embeds → Email Forwarding** |
 
 The Helpdesk ID is **not** a secret (it ships in the public embed). The **HMAC secret** and **API key are secrets** — keep them server-side only.
+
+**Finding the Helpdesk ID:** it's a UUID and is the same for every surface. In the dashboard, the **Settings** page and each embed page (**Embeds → Widget / Contact Form / Ticket Center**) show a dedicated **Helpdesk ID** box — a read-only field with the value and a **Copy Helpdesk ID** button. Click that to copy it. (It's also the `data-helpdesk-id` value pre-filled in each embed snippet.)
 
 The base URL is `https://helpdesky.io` everywhere below.
 
@@ -56,6 +58,7 @@ Several features silently do nothing until the owner configures them in the Help
 | **Enable messaging** | **Messages** page (click the **Enable messaging** button) | Contact form & ticket center to actually send/receive messages | Required for contact form + ticket center |
 | **Allowed Embed Domains** | **Settings → Messages** | Restricting which sites may embed; add the customer's site domain (leave empty = any domain allowed) | Recommended for embeds |
 | **HMAC secret** | **Embeds → Ticket Center** | Generating the secret used to sign ticket-center users | Required for ticket center |
+| **Cloudflare Turnstile** | **Embeds → Contact Form** | Bot/spam protection — paste a Turnstile **Site Key + Secret Key**; the embed code doesn't change | Optional, strongly recommended for the contact form |
 | **Helpdesk slug & name** | **Settings → General** | The help-center URL — path-based `helpdesky.io/help/{slug}` always works; subdomain / custom domain are optional | Required |
 | **Custom domain** | **Settings → Custom Domain** | Serving the help center on the customer's own domain; shows DNS/SSL verification status (CNAME → `origin.helpdesky.io`) | Optional, often plan-gated |
 | **Branding** (logo, favicon, colors, theme, layout: Default / Sidebar / Docs) | **Branding** page | Look & feel of the help center and embeds | Optional |
@@ -102,6 +105,10 @@ Optional attributes:
 The customer's domain must be in the **Allowed Embed Domains** list (**Settings → Messages**), or the submit request is rejected with a CORS/"Origin not allowed" error.
 
 The dashboard's copy snippet appends a cache-busting `?v=N` (e.g. `contact-form.js?v=5`) to the script URL — it's optional, and the plain `contact-form.js` URL works identically.
+
+**Recommend Cloudflare Turnstile (spam protection).** By default the contact form has no bot protection, so it can attract spam. Advise the customer to create a free Turnstile widget in their Cloudflare dashboard and paste the **Site Key** and **Secret Key** into the **Cloudflare Turnstile** section of **Embeds → Contact Form**. This is a dashboard-only setting — **the embed code above does not change** and the form still works without it. The Secret Key is stored server-side; only the Site Key reaches the browser.
+
+**Tip — blend into the page.** If the form looks like a separate card, turn on **Hide outer border** in **Embeds → Contact Form** to remove the outer border, background, and shadow so the embed blends into the surrounding page.
 
 ---
 
@@ -159,6 +166,8 @@ Render this only for logged-in users, injecting the **same normalized email** yo
 Optional: `data-align`, `data-max-width` (default `864px`), `data-container` (default `hdh-ticket-center`).
 
 The customer's domain must be in **Allowed Embed Domains** (**Settings → Messages**) for the ticket-center endpoints to respond. As with the contact form, the dashboard snippet appends an optional cache-busting `?v=N` (e.g. `ticket-center.js?v=5`); the plain `ticket-center.js` URL works the same.
+
+**Tip — blend into the page.** A matching **Hide outer border** toggle lives in **Embeds → Ticket Center**; enable it to drop the outer border, background, and shadow so the embed blends into the account area instead of looking like a separate card.
 
 ---
 
